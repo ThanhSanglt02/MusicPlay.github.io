@@ -184,6 +184,12 @@ const app = {
             _this.nextSong();
             audio.play();
         }
+        
+        // Khi prev song
+        prevBtn.onclick = function() {
+            _this.prevSong();
+            audio.play();
+        }
     },
     loadCurrentSong: function() {
         heading.textContent = this.currentSong.name;
@@ -195,10 +201,18 @@ const app = {
     nextSong: function() {
         this.currentIndex++;
         if (this.currentIndex >= this.songs.length) {
-            this.currentSong = 0
+            this.currentIndex = 0
         }
         this.loadCurrentSong()
     },
+    prevSong: function() {
+        this.currentIndex--;
+        if (this.currentIndex < 0) {
+            this.currentIndex = this.songs.length - 1
+        }
+        this.loadCurrentSong()
+    },
+
     start: function() {
         //định nghĩa thuộc tính mới cho object
         this.defineProperties()
