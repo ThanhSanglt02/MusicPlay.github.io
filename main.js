@@ -19,18 +19,19 @@ const cd = $('.cd');
 
 const heading = $('header h2');
 const cdThumb = $('.cd-thumb');
-// const audio = $('#audio');
-var audio = document.getElementById('audio');
-
+const audio = $('#audio');
 const playBtn = $('.btn-toggle-play');
-
 const progress = $('#progress');
 const prevBtn = $('.btn-prev');
 const nextBtn = $('.btn-next');
+const randomBtn = $('.btn-random')
+const repeatBtn = $('.btn-repeat')
 
 const app = {
     currentIndex: 0,
     ispPlaying: false,
+    isRandom:  false,
+    isRepeat: false,
     songs: [
         {
             name: 'Seven',
@@ -130,7 +131,6 @@ const app = {
         document.onscroll = function(e) {
             // console.log(document.documentElement.scrollTop)
             const scrollTop = window.scrollY || document.documentElement.scrollTop
-            console.log(scrollTop)
             const newCdWidth = cdwidth - scrollTop;
             // console.log(newCdWidth)
             cd.style.width = newCdWidth > 0 ? newCdWidth + 'px': 0;
@@ -181,14 +181,43 @@ const app = {
 
         // Khi next song
         nextBtn.onclick = function() {
-            _this.nextSong();
+            if(_this.isRandom) {
+                _this.playRandomSong()
+            } else {
+                _this.nextSong();
+            }
             audio.play();
         }
         
         // Khi prev song
         prevBtn.onclick = function() {
-            _this.prevSong();
+            if(_this.isRandom) {
+                _this.playRandomSong()
+            } else {
+                _this.prevSong();
+            }
             audio.play();
+        }
+
+        //Khi click button random bật tắt
+        randomBtn.onclick = function() {
+            _this.isRandom = !_this.isRandom 
+            randomBtn.classList.toggle('active',_this.isRandom);
+        }
+
+        //Xử lý btn repeat song bật / tắt
+        repeatBtn.onclick = function(e) {
+            _this.isRepeat = !_this.isRepeat;
+            repeatBtn.classList.toggle('active',this.isRepeat)
+        }
+
+        //Xử lý next song khi audio ended / repeat
+        audio.onended = function() {
+            if(_this.isRepeat) {
+                audio.play();
+            } else {
+                nextBtn.click();  //trình duyệt tự bấm không cần tác động user
+            }
         }
     },
     loadCurrentSong: function() {
@@ -212,7 +241,14 @@ const app = {
         }
         this.loadCurrentSong()
     },
-
+    playRandomSong: function() {
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * this.songs.length)
+        } while (newIndex === this.currentIndex)
+        this.currentIndex = newIndex
+        this.loadCurrentSong();
+    },
     start: function() {
         //định nghĩa thuộc tính mới cho object
         this.defineProperties()
