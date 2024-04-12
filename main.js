@@ -255,7 +255,7 @@ const app = {
                 behavior: 'smooth',
                 block: 'center'
             })
-        }, 1000)
+        }, 500)
     },
     loadCurrentSong: function() {
         heading.textContent = this.currentSong.name;
