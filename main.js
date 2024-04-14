@@ -14,6 +14,8 @@
 const $ = document.querySelector.bind(document)
 const $$= document.querySelectorAll.bind(document)
 
+const PLAYER_STORAGE_KEY = JSON.stringify("F8_PLAYER");
+
 const playlist = $('.playlist');
 const player = $('.player');
 const cd = $('.cd');
@@ -33,7 +35,7 @@ const app = {
     ispPlaying: false,
     isRandom:  false,
     isRepeat: false,
-
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},  //localStorage sử dụng JSON
     songs: [
         {
             name: 'Seven',
@@ -89,6 +91,10 @@ const app = {
             image: './assets/img/badboy.png'
         }
     ],
+    setConfig: function(key,value) {
+        this.config[key] = value;  //config ban đầu là object có key được gán giá trị bằng value
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config)) //localStorage.setItem(key,value);
+    },
     render: function() {
         const htmls = this.songs.map(function(song,index) {
             return `
@@ -127,7 +133,7 @@ const app = {
                 transform: 'rotate(360deg)'
             }
         ], {
-            duration: 10000,  //Để quay 1 vòng thì tốn 10s
+            duration: 10000, 
             iterations:Infinity    //Lặp lại bao nhiêu lần
         })
         cdThumbAnimate.pause();
@@ -153,14 +159,14 @@ const app = {
             }
         }
 
-        //Khi song được play 
+        //Lắng nghe sự kiện song được play và đổi incon
         audio.onplay = function() {
             _this.ispPlaying = true;
             player.classList.add('playing');
             cdThumbAnimate.play();
         }
 
-        //Khi song bị pause
+        //Lắng nghe sự kiện song bị pause
         audio.onpause = function() {
             _this.ispPlaying = false;
             player.classList.remove('playing');
@@ -211,13 +217,15 @@ const app = {
         //Khi click button random bật tắt
         randomBtn.onclick = function() {
             _this.isRandom = !_this.isRandom 
-            randomBtn.classList.toggle('active',_this.isRandom);
+            _this.setConfig('isRandom', _this.isRandom)
+            randomBtn.classList.toggle('active', _this.isRandom);
         }
 
         //Xử lý btn repeat song bật / tắt
-        repeatBtn.onclick = function(e) {
+        repeatBtn.onclick = function() {
             _this.isRepeat = !_this.isRepeat;
-            repeatBtn.classList.toggle('active',this.isRepeat)
+            _this.setConfig('isRepeat', _this.isRepeat)
+            repeatBtn.classList.toggle('active', _this.isRepeat);
         }
 
         //Xử lý next song khi audio ended / repeat
@@ -264,6 +272,10 @@ const app = {
         // audio.innerHTML = `<source src="${this.currentSong.path}">`;
         // console.log(this.currentSong.path)
     },
+    loadConfig: function() {
+        this.isRandom = this.config.isRandom
+        this.isRepeat = this.config.isRepeat
+    },
     nextSong: function() {
         this.currentIndex++;
         if (this.currentIndex >= this.songs.length) {
@@ -287,6 +299,10 @@ const app = {
         this.loadCurrentSong();
     },
     start: function() {
+
+        //Gán cấu hình từ config vào ứng dụng
+        this.loadConfig();
+
         //định nghĩa thuộc tính mới cho object
         this.defineProperties()
         //
@@ -301,7 +317,10 @@ const app = {
 
         // Render playlist
         this.render();
-        //
+
+        //Hiển thị trạng thái ban đầu của btn repeat và random
+        randomBtn.classList.toggle('active', this.isRandom);
+        repeatBtn.classList.toggle('active', this.isRepeat);
     }
 }
 app.start()
