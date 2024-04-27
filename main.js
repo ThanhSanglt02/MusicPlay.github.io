@@ -123,7 +123,7 @@ const app = {
         })
     },
 
-    handleEvent: function() {  // trong việc lăngs nghe sự kiện thì ko được sử dụng this
+    handleEvent: function() {  // trong việc lắng nghe sự kiện thì ko được sử dụng this
         const _this = this;
         const cdwidth = cd.offsetWidth;
 
@@ -269,6 +269,7 @@ const app = {
         heading.textContent = this.currentSong.name;
         cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
         audio.src = this.currentSong.path;
+        this.setConfig('currentIndex', this.currentIndex);
         // audio.innerHTML = `<source src="${this.currentSong.path}">`;
         // console.log(this.currentSong.path)
     },
@@ -290,11 +291,14 @@ const app = {
         }
         this.loadCurrentSong()
     },
-    playRandomSong: function() {
+    playRandomSong: function() {  
         let newIndex;
         do {
             newIndex = Math.floor(Math.random() * this.songs.length)
-        } while (newIndex === this.currentIndex)
+            if (!this.songArrayIdex.includes(newIndex)) {
+                this.songArrayIdex.push(newIndex); 
+            }
+        } while (newIndex === this.currentIndex);   
         this.currentIndex = newIndex
         this.loadCurrentSong();
     },
